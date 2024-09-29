@@ -28,7 +28,7 @@ cursor.execute('''
 conn.commit()
 
 def create_workout(prompt):
-    workout_app_key = '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'
+    workout_app_key = st.secrets["workout_app_key"] 
     client = Groq(api_key=workout_app_key)
 
     chat_completion = client.chat.completions.create(
