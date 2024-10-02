@@ -114,17 +114,18 @@ search_email = st.text_input(f"Enter your email to view past workouts for {email
 # Show past workouts if an email is provided
 if search_email:
     query = """
-    SELECT 
-        substr(email, 1, 3) || '***********' AS masked_email,
-        date_added,
-        goal,
-        workout
-    FROM users
-    WHERE email = ?
-    ORDER BY date_added DESC
+        SELECT 
+            substr(email, 1, 3) || '***********' AS masked_email,
+            date_added,
+            goal,
+            workout
+        FROM users
+        WHERE email LIKE ?
+        ORDER BY date_added DESC
     """
-    users_df = pd.read_sql_query(query, conn, params=[search_email])
-
+    
+    # Add wildcards to the email parameter in the Python code
+    users_df = pd.read_sql_query(query, conn, params=[f'%{search_email}%'])
     
     if not users_df.empty:
         st.dataframe(users_df)
