@@ -115,7 +115,7 @@ if submit_button:
 
 
 # Input to show existing users in the database
-search_email = st.text_input(f"Enter your email to view past workouts for {email}")
+search_email = st.text_input(f"Enter your email to view past workouts", value = f"email")
 
 # Show past workouts if an email is provided
 if search_email:
