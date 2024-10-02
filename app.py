@@ -57,29 +57,76 @@ def add_user(email, name, age, town, state, weight, height, gender, goal, prompt
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>Let's create your workout!</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center;'>Fill in your details below:</h3>", unsafe_allow_html=True)
 
-# User input form
+# User input form with grid layout
 with st.form("user_form"):
-    email = st.text_input("Email")
-    name = st.text_input("Name")
-    age = st.number_input("Age", min_value=1, max_value=120, value=25)
-    town = st.text_input("City")
-    state = st.text_input("State")
-    weight = st.number_input("Weight (lbs)", min_value=1.0, value=70.0)
-    height = st.number_input("Height (inches)", min_value=50.0, value=170.0)
-    gender = st.selectbox("Gender", ["Male", "Female"])
-    goal = st.selectbox("Goal", ["Lose Weight", "Gain Muscle", "Tone Muscles"])
-
+    # Create a two-column layout for name, email, and location
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        email = st.text_input("Email")
+        name = st.text_input("Name")
+        town = st.text_input("City")
+    
+    with col2:
+        state = st.text_input("State")
+        gender = st.selectbox("Gender", ["Male", "Female"])
+        goal = st.selectbox("Goal", ["Best workout ever", "Gain Muscle","Lose Weight", "Tone Muscles"])
+    
+    # Create a three-column layout for sliders (age, weight, height)
+    col3, col4, col5 = st.columns(3)
+    
+    with col3:
+        age = st.slider("Age", min_value=1, max_value=120, value=25)
+    
+    with col4:
+        weight = st.slider("Weight (lbs)", min_value=1.0, max_value=400.0, value=70.0)
+    
+    with col5:
+        height = st.slider("Height (inches)", min_value=50.0, max_value=96.0, value=70.0)
+    
+    # Submit button
     submit_button = st.form_submit_button("Generate my workout")
+
 
 # Handle form submission
 if submit_button:
+    # Confetti effect (using balloons)
+    st.balloons()
+    
+    # Generate workout prompt
     prompt = f"{gender} that is {height} tall and {weight} lbs and I want to {goal}"
     workout = create_workout(prompt=prompt)
-    st.text(f"Hi {name}, here is your workout:\n{workout}")
-    add_user(email, name, age, town, state, weight, height, gender, goal, prompt, workout)
+    
+    # Show success message with confetti
     st.success(f"Workout added successfully for {email}")
+    
+    # Pop-out modal to read the full workout using an expander
+    with st.expander(f"Hi {name}, click to see your workout"):
+        st.text(workout)
+    
+    # Add user info to the database
+    add_user(email, name, age, town, state, weight, height, gender, goal, prompt, workout)
 
-# Optional: Show existing users in the database
-if st.checkbox(f"Show past workouts for your {email}"):
-    users_df = pd.read_sql_query(f"SELECT email, date_added, goal, workout FROM users where email = '{email}' ORDER BY date_added DESC", conn)
-    st.dataframe(users_df)
+
+# Input to show existing users in the database
+search_email = st.text_input(f"Enter your email to view past workouts for {email}")
+
+# Show past workouts if an email is provided
+if search_email:
+    query = """
+    SELECT 
+        substr(email, 1, 3) || '***********' AS masked_email,
+        date_added,
+        goal,
+        workout
+    FROM users
+    WHERE email = ?
+    ORDER BY date_added DESC
+    """
+    users_df = pd.read_sql_query(query, conn, params=[search_email])
+
+    
+    if not users_df.empty:
+        st.dataframe(users_df)
+    else:
+        st.warning(f"No past workouts found for {search_email}")
