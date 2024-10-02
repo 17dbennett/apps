@@ -9,7 +9,6 @@ from datetime import date
 conn = sqlite3.connect('users.db')
 cursor = conn.cursor()
 
-# Create a users table if not exists (email is no longer a primary key)
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         email TEXT,
@@ -60,7 +59,6 @@ st.markdown("<h3 style='text-align: center;'>Fill in your details below:</h3>", 
 
 # User input form with grid layout
 with st.form("user_form"):
-    # Create a two-column layout for name, email, and location
     col1, col2 = st.columns(2)
     
     with col1:
@@ -73,7 +71,6 @@ with st.form("user_form"):
         gender = st.selectbox("Gender", ["Male", "Female"])
         goal = st.selectbox("Goal", ["Best workout ever", "Gain Muscle","Lose Weight", "Tone Muscles"])
     
-    # Create a three-column layout for sliders (age, weight, height)
     col3, col4, col5 = st.columns(3)
     
     with col3:
@@ -93,7 +90,6 @@ with st.form("user_form"):
 if submit_button:
     
 
-    # Check if the current month is December, January, or February
     if date.today().month in [11, 12, 1, 2]:
         st.snow()  
     else:
@@ -103,7 +99,6 @@ if submit_button:
     prompt = f"{gender} that is {height} tall and {weight} lbs and I want to {goal}"
     workout = create_workout(prompt=prompt)
     
-    # Pop-out modal to read the full workout using an expander
     with st.expander(f"Hi {name}, click to see your workout"):
         st.text(workout)
     
@@ -114,26 +109,26 @@ if submit_button:
     st.success(f"Workout added successfully for {email}")
 
 
-# Input to show existing users in the database
 search_email = st.text_input(f"Enter your email to view past workouts", value = f"{email}")
 
-# Show past workouts if an email is provided
-if search_email:
-    query = """
-        SELECT 
-            substr(email, 1, 3) || '***********' AS masked_email,
-            date_added,
-            goal,
-            workout
-        FROM users
-        WHERE email LIKE ?
-        ORDER BY date_added DESC
-    """
-    
-    # Add wildcards to the email parameter in the Python code
-    users_df = pd.read_sql_query(query, conn, params=[f'%{search_email}%'])
-    
-    if not users_df.empty:
-        st.dataframe(users_df)
+if st.button("Search"):
+    if search_email:  # Check if the user has provided an email
+        query = """
+            SELECT 
+                substr(email, 1, 3) || '***********' AS masked_email,
+                date_added,
+                goal,
+                workout
+            FROM users
+            WHERE email LIKE ?
+            ORDER BY date_added DESC
+        """
+        
+        users_df = pd.read_sql_query(query, conn, params=[f'%{search_email}%'])
+        
+        if not users_df.empty:
+            st.write(users_df)
+        else:
+            st.write("No workouts found for the provided email.")
     else:
-        st.warning(f"No past workouts found for {search_email}")
+        st.write("Please enter an email to search.")
