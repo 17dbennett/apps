@@ -4,6 +4,7 @@ import pandas as pd
 from groq import Groq
 from datetime import date
 
+
 # Initialize SQLite3 connection
 conn = sqlite3.connect('users.db')
 cursor = conn.cursor()
@@ -63,12 +64,12 @@ with st.form("user_form"):
     col1, col2 = st.columns(2)
     
     with col1:
-        email = st.text_input("Email")
-        name = st.text_input("Name")
-        town = st.text_input("City")
+        email = st.text_input("Email", value="givememyworkout@example.com")  # Preset email
+        name = st.text_input("Name", value="gimmemy workout")  # Preset name
+        town = st.text_input("City", value="gainsville") 
     
     with col2:
-        state = st.text_input("State")
+        state = st.text_input("State", value = "Musclechusetts")
         gender = st.selectbox("Gender", ["Male", "Female"])
         goal = st.selectbox("Goal", ["Best workout ever", "Gain Muscle","Lose Weight", "Tone Muscles"])
     
@@ -79,10 +80,10 @@ with st.form("user_form"):
         age = st.slider("Age", min_value=1, max_value=120, value=25)
     
     with col4:
-        weight = st.slider("Weight (lbs)", min_value=1.0, max_value=400.0, value=70.0)
+        weight = st.slider("Weight (lbs)", min_value=1.0, max_value=400.0, value=175.0)
     
     with col5:
-        height = st.slider("Height (inches)", min_value=50.0, max_value=96.0, value=70.0)
+        height = st.slider("Height (inches)", min_value=50.0, max_value=96.0, value=72.0)
     
     # Submit button
     submit_button = st.form_submit_button("Generate my workout")
@@ -90,8 +91,13 @@ with st.form("user_form"):
 
 # Handle form submission
 if submit_button:
-    # Confetti effect (using balloons)
-    st.balloons()
+    
+
+    # Check if the current month is December, January, or February
+    if date.today().month in [11, 12, 1, 2]:
+        st.snow()  
+    else:
+        st.balloons()
     
     # Generate workout prompt
     prompt = f"{gender} that is {height} tall and {weight} lbs and I want to {goal}"
