@@ -103,15 +103,15 @@ if submit_button:
     prompt = f"{gender} that is {height} tall and {weight} lbs and I want to {goal}"
     workout = create_workout(prompt=prompt)
     
-    # Show success message with confetti
-    st.success(f"Workout added successfully for {email}")
-    
     # Pop-out modal to read the full workout using an expander
     with st.expander(f"Hi {name}, click to see your workout"):
         st.text(workout)
     
     # Add user info to the database
     add_user(email, name, age, town, state, weight, height, gender, goal, prompt, workout)
+    
+    # Show success message with confetti
+    st.success(f"Workout added successfully for {email}")
 
 
 # Input to show existing users in the database
